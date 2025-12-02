@@ -1,0 +1,529 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="google-site-verification" content="BaGBCDj1ABXg3KzDNZlkpzL2LTwPyq8o4lGER1I7JDI" />
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+<title>Mobile Website Generator</title>
+
+<style>
+  :root{
+    --bg:#111; --bar:#000; --muted:#cfcfcf;
+    --topH:56px; --dockH:112px;
+    --safeBottom: env(safe-area-inset-bottom, 0px);
+    --safeTop: env(safe-area-inset-top, 0px);
+    --vh:100vh;
+    --kb:0px;
+  }
+
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; font-size:16px; }
+  html,body{ height:100%; }
+  body{ margin:0; background:var(--bg); color:#fff; font-family:-apple-system,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif; }
+  button,input{ font-size:16px; outline:none; border:0; }
+
+  .topbar{position:fixed;top:0;left:0;right:0;height:var(--topH);z-index:1200;background:var(--bar);
+    display:flex;align-items:center;gap:12px; padding:0 14px calc(0px + var(--safeTop));}
+  .topbar__btn{background:transparent;color:#fff;font-weight:700;cursor:pointer;}
+ .topbar__icon{margin-left:auto;width:36px;height:36px; font-size: 32px; display:flex; align-items: center; place-items:center;border-radius:50%;background:transparent;color:#fff;cursor:pointer;}
+  
+
+  .hero{position:fixed;top:var(--topH);left:0;right:0;
+    height:calc(var(--vh) - var(--topH) - var(--dockH) - var(--safeBottom) - var(--kb));
+    display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:0 20px;}
+  .hero h1{margin:0 0 8px;font-weight:700;font-size:23px;}
+  .hero p{margin:0;color:#d9d9d9;opacity:.95;}
+
+  .viewer-frame{
+    position:fixed;top:var(--topH);left:0;right:0;width:100%;
+    height:calc(var(--vh) - var(--topH) - var(--dockH) - var(--safeBottom) - var(--kb));
+    border:0;background:#111;display:none;
+  }
+  body.dock-hidden .viewer-frame{height:calc(var(--vh) - var(--topH));}
+  body.dock-hidden .hero{height:calc(var(--vh) - var(--topH));}
+
+  .dock{
+    position:fixed;left:0;right:0;bottom:calc(0px + var(--kb));z-index:1100;
+    background:rgba(0,0,0,.92); backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    padding:12px 14px calc(14px + var(--safeBottom));
+  }
+  .dock--hidden{transform:translateY(110%);}
+  .dock__wrap{max-width:920px;margin:0 auto;}
+  .dock__top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+  .dock__close{font-weight:700;opacity:.95;cursor:pointer;}
+  .dock__right{display:flex;align-items:center;gap:12px;color:#fff;}
+
+  .glass-btn{display:block;width:100%;cursor:pointer;border-radius:6px;padding:16px 18px;font-weight:700;
+    background:#fff;color:#111;text-align:center;box-shadow:none;margin-bottom:8px;}
+
+  .dock__links{display:flex;align-items:center;justify-content:center;gap:10px;color:#eaeaea;margin:8px 0 10px;}
+  .dock__btn{background:#2a2a2a;color:#fff;padding:8px 14px;border-radius:6px;cursor:pointer;}
+  .dock__label{color:#eaeaea;min-width:92px;text-align:center;}
+
+  .urlbar{display:flex;align-items:center;gap:10px;background:#2a2a2a;border-radius:50px;padding:5px 5px;}
+  .urlbar input{flex:1;border:0;background:transparent;color:#eaeaea;padding: 10px 0 10px 14px;}
+  .urlbar .clear{background:transparent;color:#cfcfcf;width:36px;height:36px;font-size:32px;align-items: center; display:flex;padding: 10px 0 10px 14px; border-radius:50%;cursor:pointer;}
+  .urlbar .go{background:#fff;color:#111;font-weight:700;width:40px;height:40px;border-radius:50%;cursor:pointer;}
+
+  .switch{position:relative;width:52px;height:30px;display:inline-block;}
+  .switch input{display:none;}
+  .track{position:absolute;inset:0;border-radius:999px;background:#333;}
+  .thumb{position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:999px;background:#fff;}
+  .switch input:checked + .track{background:linear-gradient(90deg,#ff8a2b 0%, #ff2d7a 100%);}
+  .switch input:checked + .track .thumb{left:25px;}
+
+  .openDock{position:fixed;bottom:calc(30px + var(--safeBottom) + var(--kb));z-index:1300;height:20px;border-radius:6px;
+    display:none;align-items:center;justify-content:center;padding:0 14px;background:linear-gradient(90deg,#ff8a2b 0%, #ff2d7a 100%);color:#fff;font-weight:700;}
+
+  
+  .topbar__imgBtn img {margin-top: 5px;
+  width: 100px;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.topbar__imgBtn img:active {
+  transform: scale(0.92);
+  opacity: 0.8;
+}
+
+  .viewer3__version {
+  margin-top: 0px;
+  text-align: center;
+  font-size: 14px;
+  opacity: 0.85;
+  color: #fff;
+}
+
+.viewer3__version .vNote {
+  font-size: 12px;
+  color: #ffc107; /* สีเหลือง */
+  margin-left: 4px;
+}
+
+  </style>
+</head>
+
+<body>
+  <!-- Top bar -->
+  <!-- Top bar -->
+<div class="topbar">
+  <button class="topbar__btn" id="homeTop">Home</button>
+  <button class="topbar__btn" id="backTop">Back</button>
+
+  <!-- รูปภาพปุ่มใหม่ -->
+  <a href="https://play.google.com/store/apps/details?id=com.bulkget.webview" 
+     target="_blank" class="topbar__imgBtn">
+      <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgmKPhw6kPLqWck61btemIO_XNgjpxHX9_FrPqcUz-5s3_BFPaHSbw2JBK13eifOXeNXBp7Ytn588p74s0NgaCvzdgVkcUiBCecbXnu8hHFFaZ4iZyDvQLxDWmJ9SCkY-nxZtF-Ii-ZCEUxsOGrjuO5DEoZX-DTMnP4B-RW-AynJtulr_f8cqlfwapZ/s1000/5a902dbf7f96951c82922875.png" 
+           alt="Tool Button" />
+  </a>
+<div class="viewer3__version">V. 4.0.0<span class="vNote"></span></div>
+
+  <button class="topbar__icon" id="refreshTop">⟳</button>
+</div>
+<!--
+  <div class="topbar">
+    <button class="topbar__btn" id="homeTop">Home</button>
+    <button class="topbar__btn" id="backTop">Back</button>
+    <button class="topbar__icon" id="refreshTop">⟳</button>
+  </div>-->
+
+  <!-- Hero -->
+  <main class="hero" id="hero">
+    <div>
+      <h1>Website Generator Tools</h1>
+      <p>By BulkGet WebViewer</p>
+    </div>
+  </main>
+
+<!--<iframe id="mainIframe" class="viewer-frame" title="Main preview"></iframe>-->
+<!--<iframe id="promoIframe" class="viewer-frame" title="GetStarted preview"></iframe>-->
+ <iframe
+
+  id="mainIframe"
+
+  class="viewer-frame"
+
+  title="Main preview"
+
+  allow="fullscreen"
+
+  sandbox="allow-scripts allow-same-origin allow-forms allow-downloads allow-modals allow-presentation allow-fullscreen">
+
+</iframe>
+
+<iframe
+
+  id="promoIframe"
+
+  class="viewer-frame"
+
+  title="GetStarted preview"
+
+  allow="fullscreen"
+
+  sandbox="allow-scripts allow-same-origin allow-forms allow-downloads allow-modals allow-presentation allow-popups allow-fullscreen">
+
+</iframe> 
+  <!-- Dock -->
+  <div class="dock" id="dock">
+    <div class="dock__wrap">
+      <div class="dock__top">
+        <div class="dock__close" id="closeBtn">Close</div>
+        <div class="dock__right">
+          <span>sandbox <strong id="sbState">On</strong></span>
+          <label class="switch">
+            <input id="sbToggle" type="checkbox" checked />
+            <div class="track"><div class="thumb"></div></div>
+          </label>
+        </div>
+      </div>
+
+      <button class="glass-btn" id="getStartedBtn">Get Started &gt; BulkGet Tools</button>
+
+      <!-- Zoom controls -->
+      <div class="dock__links">
+        <button id="zoomOutBtn"   class="dock__btn">− Zoom</button>
+        <span   id="zoomLabel"    class="dock__label">Zoom: 100%</span>
+        <button id="zoomInBtn"    class="dock__btn">+ Zoom</button>
+        <button id="zoomResetBtn" class="dock__btn">Reset</button>
+      </div>
+
+      <!-- URL bar -->
+      <div class="urlbar">
+        <input id="urlInput" placeholder="https://" inputmode="url" />
+        <button class="clear" id="clearBtn">×</button>
+        <button class="go" id="goBtn">Go</button>
+      </div>
+    </div>
+  </div>
+
+  <button class="openDock" id="openDockBtn">Open</button>
+<script>
+/* ===== viewport & keyboard ===== */
+function setVH(){document.documentElement.style.setProperty('--vh',window.innerHeight+'px');}
+setVH(); addEventListener('resize',setVH);
+function updateKB(){try{
+  if(window.visualViewport){
+    const vv=window.visualViewport;
+    const kb=Math.max(0,window.innerHeight-Math.round(vv.height));
+    document.documentElement.style.setProperty('--kb',kb+'px');
+  }
+}catch(e){}}
+if(window.visualViewport){
+  visualViewport.addEventListener('resize',updateKB);
+  visualViewport.addEventListener('scroll',updateKB);
+}
+
+/* ===== elements ===== */
+const iframe      = document.getElementById('mainIframe');
+const hero        = document.getElementById('hero');
+const dock        = document.getElementById('dock');
+const urlIn       = document.getElementById('urlInput');
+const goBtn       = document.getElementById('goBtn');
+const clearBtn    = document.getElementById('clearBtn');
+const closeBtn    = document.getElementById('closeBtn');
+const sbTg        = document.getElementById('sbToggle');
+const sbState     = document.getElementById('sbState');
+const homeTop     = document.getElementById('homeTop');
+const backTop     = document.getElementById('backTop');
+const refreshTop  = document.getElementById('refreshTop');
+const openDockBtn = document.getElementById('openDockBtn');
+const getStartedBtn = document.getElementById('getStartedBtn');
+const zoomLabel   = document.getElementById('zoomLabel');
+
+const urlStack   = [];
+let activeFrame  = iframe;
+
+const SANDBOX_INPUT =
+  "allow-fullscreen allow-scripts allow-same-origin allow-forms allow-downloads allow-modals allow-presentation";
+const SANDBOX_GETSTARTED =
+  SANDBOX_INPUT + " allow-popups";
+
+/* ===== helpers ===== */
+function showHero(){
+  hero.style.display='flex';
+  iframe.style.display='none';
+  iframe.removeAttribute('src');
+  zoomLevel=1; applyZoom();
+}
+function showIframe(){
+  hero.style.display='none';
+  iframe.style.display='block';
+  activeFrame=iframe;
+}
+function sanitize(u){
+  let t=(u||'').trim(); if(!t) return '';
+  if(!/^https?:\/\//i.test(t)) t='https://'+t;
+  try{ return new URL(t).href }catch{ return '' }
+}
+
+function applySandbox(reload=false, mode="input"){
+  const flags = (mode==="getstarted") ? SANDBOX_GETSTARTED : SANDBOX_INPUT;
+  if(sbTg.checked){
+    iframe.setAttribute('sandbox', flags);
+    sbState.textContent='On';
+  }else{
+    iframe.removeAttribute('sandbox');
+    sbState.textContent='Off';
+  }
+  if(reload && iframe.src) iframe.src = iframe.src;
+}
+
+function positionOpenButton(){
+  const wrap=document.querySelector('.dock__wrap'); if(!wrap||!openDockBtn) return;
+  const rect=wrap.getBoundingClientRect(); openDockBtn.style.left=rect.left+'px';
+}
+positionOpenButton(); addEventListener('resize',positionOpenButton);
+
+function protectIframe(){
+  iframe.onload = function(){
+    try{
+      const w = iframe.contentWindow;
+      w.onbeforeunload = function(){ return "You are about to leave the page. Are you sure?"; };
+      const originalOpen = w.open;
+      w.open = function(){ console.log("Popup blocked"); return null; };
+      const obs = new MutationObserver(muts=>{
+        muts.forEach(m=>{
+          if(m.type==='childList'){
+            m.addedNodes.forEach(n=>{
+              if(n.nodeName==='SCRIPT'){ n.parentNode.removeChild(n); console.log('Script removed'); }
+            });
+          }
+        });
+      });
+      obs.observe(w.document,{childList:true,subtree:true});
+      console.log('Protection enabled for mainIframe');
+    }catch(e){ console.warn('Protect failed (cross-origin):', e); }
+  };
+}
+function loadUrl(u){
+  const clean = sanitize(u); if(!clean){ alert('Invalid URL'); return; }
+  showIframe();
+  applySandbox(false, "input");        iframe.src = clean;
+  protectIframe();
+  if(!urlStack.length || urlStack[urlStack.length-1]!==clean) urlStack.push(clean);
+}
+
+/* ===== URL input events ===== */
+goBtn.addEventListener('click', ()=> loadUrl(urlIn.value) );
+urlIn.addEventListener('keydown', e=>{ if(e.key==='Enter') goBtn.click(); });
+clearBtn.addEventListener('click', ()=>{ urlIn.value=''; urlIn.focus(); });
+
+/* ===== Dock open/close ===== */
+// ===== Dock open/close functions =====
+function hideDock() {
+  dock.classList.add('dock--hidden');
+  document.body.classList.add('dock-hidden');
+  positionOpenButton();
+  openDockBtn.style.display = 'flex';
+}
+
+function showDock() {
+  dock.classList.remove('dock--hidden');
+  document.body.classList.remove('dock-hidden');
+  openDockBtn.style.display = 'none';
+  positionOpenButton();
+}
+closeBtn.addEventListener('click', hideDock);
+openDockBtn.addEventListener('click', showDock);
+
+getStartedBtn.addEventListener('click', () => {
+const b64 = "aHR0cHM6Ly9zZGdodmd5aGhobi52ZXJjZWwuYXBwLw=="; 
+  const url = atob(b64);
+  loadUrl(url);      
+  hideDock();       
+});
+  
+/* ===== Sandbox toggle ===== */
+sbTg.addEventListener('change', ()=>applySandbox(true));
+
+/* ===== Top bar controls ===== */
+homeTop.addEventListener('click', showHero);
+backTop.addEventListener('click', ()=>{
+  if(urlStack.length>1){ urlStack.pop(); iframe.src = urlStack[urlStack.length-1]; }
+  else { try{ history.back(); }catch(e){} }
+});
+  
+  
+  
+refreshTop.addEventListener('click', ()=>{ if(iframe.src) iframe.src = iframe.src; });
+ 
+  
+(function(){
+  const b64 = "aHR0cHM6Ly9zZGdodmd5aGhobi52ZXJjZWwuYXBwLw==";
+
+  const url = atob(b64);
+
+  getStartedBtn.addEventListener('click', ()=>{
+    showIframe();
+
+    applySandbox(false, "getstarted");
+
+    iframe.src = url;
+    protectIframe();
+    if(!urlStack.length || urlStack[urlStack.length-1]!==url) urlStack.push(url);
+
+    const revert = ()=>{ applySandbox(false, "input"); iframe.removeEventListener('load', revert); };
+    iframe.addEventListener('load', revert);
+  });
+})();
+
+/* ===== Zoom ===== */
+/*let zoomLevel=1.0;
+function applyZoom(){
+  const f = activeFrame; if(!f) return;
+  f.style.transform=`scale(${zoomLevel})`;
+  f.style.transformOrigin='top left';
+  f.style.width=`${(1/zoomLevel)*100}%`;
+  if(zoomLabel) zoomLabel.textContent=`Zoom: ${Math.round(zoomLevel*100)}%`;
+}
+document.getElementById('zoomInBtn').addEventListener('click',()=>{ if(zoomLevel<2){ zoomLevel=Math.round((zoomLevel+0.1)*10)/10; applyZoom(); }});
+document.getElementById('zoomOutBtn').addEventListener('click',()=>{ if(zoomLevel>0.3){ zoomLevel=Math.round((zoomLevel-0.1)*10)/10; applyZoom(); }});
+document.getElementById('zoomResetBtn').addEventListener('click',()=>{ zoomLevel=1; applyZoom(); });
+-->*/
+  
+/* ===== Zoom (scrollable, fine step, safe) ===== */
+(function(){
+  const frame      = document.getElementById('mainIframe');
+  const zoomInBtn  = document.getElementById('zoomInBtn');
+  const zoomOutBtn = document.getElementById('zoomOutBtn');
+  const zoomResetBtn = document.getElementById('zoomResetBtn');
+  const zoomLabel  = document.getElementById('zoomLabel');
+
+  // ── สร้าง wrapper ครอบ iframe เพื่อให้เลื่อนได้ ──
+  let scroller = document.getElementById('zoomScroller');
+  let surface  = document.getElementById('zoomSurface');
+
+  if(!scroller){
+    scroller = document.createElement('div');
+    scroller.id = 'zoomScroller';
+    // ใช้กรอบตำแหน่งเดียวกับ .viewer-frame
+    scroller.style.cssText = `
+      position: fixed;
+      top: var(--topH);
+      left: 0; right: 0;
+      width: 100%;
+      height: calc(var(--vh) - var(--topH) - var(--dockH) - var(--safeBottom) - var(--kb));
+      overflow: auto; background: transparent;
+      z-index: 0; /* ให้ชั้นเดียวกับ iframe เดิม */
+      display: none;
+    `;
+
+    // ให้รองรับโหมดซ่อน dock
+    const syncDockHeight = () => {
+      if (document.body.classList.contains('dock-hidden')) {
+        scroller.style.height = `calc(var(--vh) - var(--topH))`;
+      } else {
+        scroller.style.height = `calc(var(--vh) - var(--topH) - var(--dockH) - var(--safeBottom) - var(--kb))`;
+      }
+    };
+    new MutationObserver(syncDockHeight).observe(document.body, { attributes:true, attributeFilter:['class'] });
+    addEventListener('resize', syncDockHeight);
+
+    surface = document.createElement('div');
+    surface.id = 'zoomSurface';
+    surface.style.cssText = `position: relative; width: 100%; height: 100%;`;
+
+    // แทรก scroller ก่อน iframe แล้วย้าย iframe เข้าไป
+    frame.parentNode.insertBefore(scroller, frame);
+    scroller.appendChild(surface);
+
+    // ปรับสไตล์ iframe ภายในให้เหมาะกับการสเกล
+    surface.appendChild(frame);
+    frame.style.position = 'absolute';
+    frame.style.top = '0';
+    frame.style.left = '0';
+    frame.style.width = '100%';
+    frame.style.height = '100%';
+    frame.style.transformOrigin = 'top left';
+
+    // ซิงก์การแสดงผลระหว่าง iframe กับ scroller (กันจอดำ/ซ้อน)
+    const syncDisplay = () => {
+      const d = (frame.style.display || getComputedStyle(frame).display);
+      scroller.style.display = (d === 'none') ? 'none' : 'block';
+    };
+    const mo = new MutationObserver(syncDisplay);
+    mo.observe(frame, { attributes:true, attributeFilter:['style','class'] });
+    syncDisplay();
+
+    // อัพเดทเมื่อ viewport/คีย์บอร์ดเปลี่ยน
+    addEventListener('resize', syncDisplay);
+  }
+
+  // ── สเกลละเอียด + เลื่อนรักษาศูนย์กลาง ──
+  let zoomLevel = 1.0;
+  const step = 0.1, minZoom = 0.5, maxZoom = 3.0;
+
+  function updateLabel(){
+    if (zoomLabel) zoomLabel.textContent = `Zoom: ${Math.round(zoomLevel*100)}%`;
+  }
+
+  function applyZoom(){
+    // ปรับขนาดผิว (surface) เพื่อให้เกิด scrollWidth/scrollHeight
+    surface.style.width  = (100 * zoomLevel) + '%';
+    surface.style.height = (100 * zoomLevel) + '%';
+    // สเกลเนื้อหาจริงบน iframe ให้คม
+    frame.style.transform = `scale(${zoomLevel})`;
+    updateLabel();
+  }
+
+  function keepCenter(prevZoom){
+    const cx = scroller.scrollLeft + scroller.clientWidth/2;
+    const cy = scroller.scrollTop  + scroller.clientHeight/2;
+    const ratio = zoomLevel / prevZoom;
+    scroller.scrollTo({
+      left: (cx * ratio) - scroller.clientWidth/2,
+      top:  (cy * ratio) - scroller.clientHeight/2,
+      behavior: 'auto'
+    });
+  }
+
+  function doZoomIn(){
+    const prev = zoomLevel;
+    zoomLevel = Math.min(maxZoom, Math.round((zoomLevel + step)*100)/100);
+    applyZoom(); keepCenter(prev);
+  }
+  function doZoomOut(){
+    const prev = zoomLevel;
+    zoomLevel = Math.max(minZoom, Math.round((zoomLevel - step)*100)/100);
+    applyZoom(); keepCenter(prev);
+  }
+  function doZoomReset(){
+    zoomLevel = 1.0;
+    applyZoom();
+    scroller.scrollTo({left:0, top:0, behavior:'smooth'});
+  }
+
+  // ── ปุ่มควบคุม ──
+  zoomInBtn .addEventListener('click', doZoomIn);
+  zoomOutBtn.addEventListener('click', doZoomOut);
+  zoomResetBtn.addEventListener('click', doZoomReset);
+
+  // อัพเดท label ครั้งแรก
+  updateLabel();
+
+  // ถ้า iframe โหลดหน้าใหม่ (จาก Go/Get Started/Back/Refresh) ให้คงระดับซูมเดิม
+  document.getElementById('mainIframe').addEventListener('load', () => {
+    // ไม่รีเซ็ต zoomLevel — คงค่าที่ผู้ใช้ตั้งไว้
+    applyZoom();
+  });
+})();  
+  
+  
+/* ===== init ===== */
+(function init(){ showHero(); })();
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
+
